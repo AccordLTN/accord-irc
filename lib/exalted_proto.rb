@@ -1,27 +1,44 @@
 def roller(die, rep=1)
-	return rep.times.map{10}
+	#return rep.times.map{die}
+	return rep.times.map{1 + rand(die)}
 end
 
-def Exalted (message)
-	message = message.split
+# Returns true if illegal character found.
+def check_character(arguement)
+	arguement.each_char do |s|
+		if !(s =~ /[\d+-\/*#]/)
+			return true;
+		end
+	end
+	return false;
+end
 
-	if message.length < 2 || !(message[1][0] =~ /\d/) || message[1] =~ /[a-z]/
+def execute (input)
+	input = input.split
+
+	# Are there any arguements, does it start with a digit, does it have illegal chars?
+	if input.length < 2 || !(input[1][0] =~ /\d/) || check_character(input[1])
 		return "Nick: Human error."
 	end
 
 	double_tens = true
 	reply = "Nick: "
+	rolls = []
 
-	if message[0] =~ /a/
-		reply += "Aren't you superstitious. "
+	# This will trigger its own reply in the future, but do nothing else.
+	if input[0] =~ /a/
+		#reply += "Aren't you superstitious. "
 	end
 
-	if message[0] =~ /m/
-		reply += "No kill. "
+	# This will just not double tens in the success count, no reply.
+	if input[0] =~ /m/
+		#reply += "No kill. "
 		double_tens = false
 	end
-	
-	reply += "We shouldn't get here yet."
 
-	return reply
+	rolls = roller(10, input[1].to_i)
+	ordered_rolls = rolls.sort.reverse
+	#reply += "We shouldn't get here yet."
+
+	return reply + ordered_rolls.join(', ') + "      " + rolls.to_s
 end
