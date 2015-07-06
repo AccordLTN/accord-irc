@@ -1,16 +1,35 @@
 def roller(die, rep=1)
-	#return rep.times.map{die}
+	# Debugging, just returns max die:
+	# return rep.times.map{die}
+
+	# The real roller:
 	return rep.times.map{1 + rand(die)}
 end
 
 # Returns true if illegal character found.
 def check_character(arguement)
-	arguement.each_char do |s|
-		if !(s =~ /[\d+-\/*#]/)
-			return true;
-		end
-	end
-	return false;
+  arguement.each_char do |s|
+    if !(s =~ /[d\d\+-\/*#]/)
+      return true;
+    end
+  end
+  return false;
+end
+
+# Returns true if illegal syntax found.
+def check_arguement(arguement)
+  # First character must be a number.
+  if !(arguement[0] =~ /\d/)
+    return true;
+  # Two operators in a row is detected.
+  elsif arguement =~ /[d+\-*\/][d+\-*\/]/
+    return true;
+  # Illegal characters
+  elsif check_character(arguement)
+    return true;
+  else
+    return false;
+  end
 end
 
 def execute (input)

@@ -1,6 +1,6 @@
 class Dicer
   include Cinch::Plugin
-  require "./lib/roll_helper.rb"
+  require "./lib/accord_helper.rb"
 
   match /roll\s/
 

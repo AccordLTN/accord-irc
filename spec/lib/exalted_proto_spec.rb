@@ -10,6 +10,17 @@ describe "Parses message and handles rolls" do
 			expect(execute("!ex f10")).to eq("Nick: Human error.")
 		end
 
+		it "should find a number and present false rolls" do
+			expect(execute("!ex 5")).to eq("Nick: [10, 10, 10, 10, 10]")
+		end
+	end
+end
+
+
+
+
+
+
 		#it "should for now detect a number in input" do
 		#	expect(execute("!ex 10")).to eq("Nick: We shouldn't get here yet.")
 		#end
@@ -17,9 +28,3 @@ describe "Parses message and handles rolls" do
 		#it "should for now detect a number in input" do
 		#	expect(execute("!exam 10")).to eq("Nick: Aren't you superstitious. No kill. We shouldn't get here yet.")
 		#end
-
-		it "should find a number and present false rolls" do
-			expect(execute("!ex 5")).to eq("Nick: [10, 10, 10, 10, 10]")
-		end
-	end
-end

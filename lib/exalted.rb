@@ -1,6 +1,6 @@
 class Exalted
   include Cinch::Plugin
-  require "./lib/roll_helper.rb"
+  require "./lib/accord_helper.rb"
 
   match /ex/
 
@@ -45,6 +45,11 @@ class Exalted
 		# Send response
 		m.reply response
 	end
+  end
+
+  # Break a string like "2#10d6+10/5-4*2" into [2, "#", 10, "d", 6 ...] etc
+  def parse_arguement (input_string)
+
   end
 
   def success_count (roll_array, ten_bool, sidereal=10)
