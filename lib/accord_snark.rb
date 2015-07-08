@@ -1,10 +1,5 @@
 class AccordSnark
   include Cinch::Plugin
-  
-  match "exa", method: :exa_snark
-  def exa_snark(m)
-    m.reply "Superstition is a funny thing..."
-  end
 
   match "botsnack", method: :snack_snark
   def snack_snark(m)
