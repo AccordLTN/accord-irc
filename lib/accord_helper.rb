@@ -117,9 +117,10 @@ def roll_handler (math_array, cosmetic_array)
     cosmetic_array.delete_at(dice_pos+1)
 
     # Fetch the number before it and delete it from the array
-    # This changes dice_pos, so change dice pos too
     dice_repeat = math_array.delete_at(dice_pos-1).to_i
     c_dice_repeat = cosmetic_array.delete_at(dice_pos-1)
+
+    # This changes the d operator position, so change dice_pos too
     dice_pos -= 1
 
     # Roll the dice, receiving an array of dice values in return
@@ -152,8 +153,68 @@ end
 # puts math_array
 # puts cosmetic_array
 
-# searches array for */ operator, then +- operator, pops out adjacent numbers,
+# Searches array for */ operator, then +- operator, pops out adjacent numbers,
 # then performs the respective math before replacing the operator with the new number
 def math_handler(math_array)
+  # While the math array has * operators, solve them left to right.
+  while math_array.include?("*")
+    # Get the index of the first * operator
+    mult_pos = math_array.index("*").to_i
+    mult_b = math_array.delete_at(mult_pos+1).to_i
+    mult_a = math_array.delete_at(mult_pos-1).to_i
+    mult_pos -= 1
+    # Replace the * operator with the new number
+    math_array[mult_pos] = (mult_a * mult_b).to_s
+  end
 
+  # While the math array has / operators, solve them left to right.
+  while math_array.include?("/")
+    # Get the index of the first / operator
+    div_pos = math_array.index("/").to_i
+    div_b = math_array.delete_at(div_pos+1).to_i
+    div_a = math_array.delete_at(div_pos-1).to_i
+    div_pos -= 1
+    # Replace the / operator with the new number
+    math_array[math_array.index("/").to_i] = (div_a / div_b).to_s
+  end
+
+  # While the math array has + operators, solve them left to right.
+  while math_array.include?("+")
+    # Get the index of the first + operator
+    plus_pos = math_array.index("+")
+    plus_b = math_array.delete_at(plus_pos+1).to_i
+    plus_a = math_array.delete_at(plus_pos-1).to_i
+    plus_pos -= 1
+    # Replace the + operator with the new number    
+    math_array[plus_pos] = (plus_a + plus_b).to_s
+  end
+
+  # While the math array has - operators, solve them left to right.
+  while math_array.include?("-")
+    # Get the index of the first - operator
+    sub_pos = math_array.index("-")
+    sub_b = math_array.delete_at(sub_pos+1).to_i
+    sub_a = math_array.delete_at(sub_pos-1).to_i
+    sub_pos -= 1
+    # Replace the - operator with the new number
+    math_array[sub_pos] = (sub_a - sub_b).to_s
+  end
+
+  # Should be just one number.
+  return math_array
 end
+
+
+#math_array = ["10", "+", "6", "+", "10", "/", "5", "-", "4", "*", "2"]
+#p math_array.to_s
+#p 10 + 6 + 10 / 5 - 4 * 2
+#p math_handler(["10", "+", "6", "+", "10", "/", "5", "-", "4", "*", "2"])
+
+#     dice_faces = math_array.delete_at(dice_pos+1).to_i
+#     cosmetic_array.delete_at(dice_pos+1)
+
+#     # Fetch the number before it and delete it from the array
+#     # This changes dice_pos, so change dice pos too
+#     dice_repeat = math_array.delete_at(dice_pos-1).to_i
+#     c_dice_repeat = cosmetic_array.delete_at(dice_pos-1)
+#     dice_pos -= 1
