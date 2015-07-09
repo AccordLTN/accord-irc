@@ -15,6 +15,7 @@ class Exalted
     double_tens = true
     auto_success = 0
     target_number = 7
+    double_custom = false
 
     # Input sanitation and error checking
     sanitation = sanitize_input(input)
@@ -47,9 +48,26 @@ class Exalted
     if input[0] =~ /m/
       double_tens = false
     end
-    m.reply response + input[2]
-    # !exs supplies a new target number, should be in input[2]
-    if input[0] =~ /s/
+
+    # !exd adds another number that grants double successes
+    if input[0] =~ /d/
+      if input[2] =~ /^\d*$/
+        double_custom = input[2].to_i
+      else
+        m.reply response +"Improper use of !exd, pelase provide a target number as the second arguement."
+        return 1
+      end
+    end
+
+    # !exs supplies a new target number, should be in input[2] or input[3] if !exd is enabled
+    if input[0] =~ /s/ && double_custom != false
+      if input[3] =~ /^\d*$/
+        target_number = input[3].to_i
+      else
+        m.reply response + "Improper use of !exds, please provide a double number as the second arguement and a target number as the third arguement."
+        return 1
+      end
+    elsif input[0] =~ /s/
       if input[2] =~ /^\d*$/
         target_number = input[2].to_i
       else
@@ -62,11 +80,15 @@ class Exalted
     if input[2] =~ /^\+\d*$/
       auto_success = input[2].to_i
     elsif input[3] =~ /^\+\d*$/
-      auto_success = input[2].to_i
+      auto_success = input[3].to_i
+    elsif input[4] =~ /^\+\d*$/
+      auto_success = input[4].to_i
     elsif input[2] =~ /^-\d*$/
       auto_success = -(input[2].to_i)
     elsif input[3] =~ /^-\d*$/
-      auto_success = -(input[2].to_i)
+      auto_success = -(input[3].to_i)
+    elsif input[4] =~ /^-\d*$/
+      auto_success = -(input[4].to_i)
     end
 
     # Performing Exalted rolls
@@ -77,6 +99,21 @@ class Exalted
 
     # Add total rolls to response
     response += "(" + math_array[0].to_s + ") "
+
+    # Add M mode
+    if !double_tens
+      response += "(M) "
+    end
+
+    # Add D mode
+    if double_custom != false
+      response += "(D" + double_custom.to_s + ") "
+    end
+
+    # Add S mode
+    if target_number != 7
+      response += "(S" + target_number.to_s + ") "
+    end
 
     # Add ordered array to response
     response += roll_array.sort.reverse.join(', ')
@@ -95,10 +132,16 @@ class Exalted
     m.reply response
 	end
 
-  def success_count (roll_array, double_tens = true, auto_success = 0,target_number = 7)
+  def success_count (roll_array, double_tens = true, auto_success = 0,target_number = 7, double_custom = 10)
     successes = auto_success
+    if double_custom == false
+      double_custom = 10
+    end
+
     roll_array.each do |x|
       if x.to_i == 10 && double_tens
+        successes += 2
+      elsif x.to_i == double_custom
         successes += 2
       elsif x.to_i >= target_number
         successes += 1
@@ -110,25 +153,3 @@ class Exalted
 end
 
 # !exam 14+5-2 +2 Someday this will work
-
-
-
-
-#   rolls = []
-
-    # # Need to parse +'s and -'s
-    # total_rolls = input[1].to_i
-
-    
-    # rolls = roller(10, total_rolls)
-    # ordered_rolls = rolls.sort.reverse
-
-    # # Add total rolls to response
-    # response += "(" + total_rolls.to_s + ") "
-    # # Add ordered rolls to response
-    # response += ordered_rolls.join(', ') 
-    # # Add unordered rolls to response
-    # response += "      " + rolls.to_s
-    
-    # # Send response
-    # m.reply response
