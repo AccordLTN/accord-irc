@@ -1,3 +1,17 @@
+# deep_dup implementation for Array and Object
+class Array
+  def deep_dup
+    map {|x| x.deep_dup}
+  end
+end
+
+class Object
+  def deep_dup
+    dup
+  end
+end
+
+
 # Returns true if illegal character found.
 def check_character(arguement)
   arguement.each_char do |s|
@@ -50,6 +64,9 @@ def roller(die, rep=1)
 end
 
 def sanitize_input(input)
+  repetition = 1
+  arguement_string = input[1]
+
   # Are there any arguements?
   if input.length < 2
     return "An arguement is required."
@@ -58,26 +75,27 @@ def sanitize_input(input)
   # Let's handle repeats first and get their operator out of the way
   # If it has a repeat operator
   # We need to access a global variable here... orz
-  if input[1] =~ /\#/
+  if arguement_string =~ /\#/
     # That operator must be the first operator, else error.
-    if input[1] =~ /^\d*\#/
-      temp_array = repeat_handler(input[1])
+    if arguement_string =~ /^\d*\#/
+      temp_array = repeat_handler(arguement_string)
       if temp_array[1] =~ /\#/
         return "Two repeat operators? Get out."
       end
-      repetition = temp_array[0]
-      input[1] = temp_array[1]
+      # puts temp_array[0]
+      repetition = temp_array[0].to_i
+      arguement_string = temp_array[1]
     else
       return "Improper repeat operator usage."
     end
   end
 
   # Are there illegal characters or syntax?
-  if check_arguement(input[1])
+  if check_arguement(arguement_string)
     return "Illegal character(s) or syntax."
   end
 
-  return false
+  return [false, arguement_string, repetition]
 end
 
 # puts sanitize_input("!exa 10d6+10/5-4*2".split)
@@ -89,16 +107,41 @@ end
 # sends them to roller and replaces d with the sum of the roller result
 # needs to send the dice array somewhere too...
 def roll_handler (math_array, cosmetic_array)
-  # Test globalness
-  cosmetic_array += "meowkins"
+  # Get the position of the first d operator
+  dice_pos = math_array.index("d")
+
+  # Fetch the number after it and delete it from the array
+  dice_faces = math_array.delete_at(dice_pos+1).to_i
+  cosmetic_array.delete_at(dice_pos+1)
+
+  # Fetch the number before it and delete it from the array
+  # This changes dice_pos, so change dice pos too
+  dice_repeat = math_array.delete_at(dice_pos-1).to_i
+  cosmetic_array.delete_at(dice_pos-1)
+  dice_pos -= 1
+
+  # Roll the dice, receiving an array of dice values in return
+  dice_output = roller(dice_faces, dice_repeat)
+
+  # Now add up the dice values
+  dice_sum = 0
+  dice_output.each{|x| dice_sum += x}
+
+  # Replace the d operator with the dice sum in the math array
+  math_array[dice_pos] = dice_sum.to_s
+
+  # Replace the d operator with the dice output in the cosmetic array
+  cosmetic_array[dice_pos] = "[" + dice_output.join("+") + ", " + dice_sum.to_s + "]"
+
+  return [math_array, cosmetic_array]
 end
 
-@math_array = ["10", "d", "6", "+", "10", "/", "5", "-", "4", "*", "2"]
-@cosmetic_array = ["10", "d", "6", "+", "10", "/", "5", "-", "4", "*", "2"]
-puts math_array
-roll_handler(@math_array,@cosmetic_array)
-puts math_array
-puts cosmetic_array
+# math_array = ["10", "d", "6", "+", "10", "/", "5", "-", "4", "*", "2"]
+# cosmetic_array = ["10", "d", "6", "+", "10", "/", "5", "-", "4", "*", "2"]
+# puts math_array
+# roll_handler(@math_array,@cosmetic_array)
+# puts math_array
+# puts cosmetic_array
 
 # searches array for */ operator, then +- operator, pops out adjacent numbers,
 # then performs the respective math before replacing the operator with the new number

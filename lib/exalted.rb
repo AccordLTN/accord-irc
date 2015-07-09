@@ -2,49 +2,68 @@ class Exalted
   include Cinch::Plugin
   require "./lib/accord_helper.rb"
   #require "accord_helper" # doesn't work?
+  #attr_accessor :math_array, :cosmetic_array, :repetition
 
   match /ex/
 
   def execute(m)
   	input = m.message.split
-  	continue = true
+    double_tens = true
+    response = "#{m.user.nick}: "
+    math_array = []
+    cosmetic_array = []
+    repetition = 1
 
-  	if input.length < 2 || !(input[1][0] =~ /\d/) || check_character(input[1])
-		m.reply "#{m.user.nick}: Human error."
-		continue = false
-	end
+    # Input sanitation and error checking
+    sanitation = sanitize_input(input)
+    if sanitation[0] != false
+      m.reply response + sanitation[0]
+      return 1
+    end
+    input[1] = sanitation[1]
+    repetition = sanitation[2]
+	
+		# Parsing
+    math_array = parse_arguement(input[1])
+    cosmetic_array = math_array.deep_dup
 
-	if continue
-		double_tens = true
-		response = "#{m.user.nick}: "
-		rolls = []
+    # 
+    rolls_handled = roll_handler(math_array, cosmetic_array)
+    math_array = rolls_handled[0]
+    cosmetic_array = rolls_handled[1]
 
-		# !exa triggers snark!
-		if input[0] =~ /a/
-			m.reply "Aren't you superstitious."
-		end
 
-		# !exm disables double_tens
-		if input[0] =~ /m/
-			double_tens = false
-		end
+    # Debugging
+    m.reply rolls_handled.to_s
+    m.reply response + cosmetic_array.join('') + " " + repetition.to_s
+    m.reply response + math_array.join('') + " " + repetition.to_s
 
-		# Need to parse +'s and -'s
-		total_rolls = input[1].to_i
+
+
+
+  #   rolls = []
+
+		# # !exm disables double_tens
+		# if input[0] =~ /m/
+		# 	double_tens = false
+		# end
+
+		# # Need to parse +'s and -'s
+		# total_rolls = input[1].to_i
 
 		
-		rolls = roller(10, total_rolls)
-		ordered_rolls = rolls.sort.reverse
+		# rolls = roller(10, total_rolls)
+		# ordered_rolls = rolls.sort.reverse
 
-		# Add total rolls to response
-		response += "(" + total_rolls.to_s + ") "
-		# Add ordered rolls to response
-		response += ordered_rolls.join(', ') 
-		# Add unordered rolls to response
-		response += "      " + rolls.to_s
+		# # Add total rolls to response
+		# response += "(" + total_rolls.to_s + ") "
+		# # Add ordered rolls to response
+		# response += ordered_rolls.join(', ') 
+		# # Add unordered rolls to response
+		# response += "      " + rolls.to_s
 		
-		# Send response
-		m.reply response
+		# # Send response
+		# m.reply response
 	end
 
   def success_count (roll_array, ten_bool, sidereal=10)
