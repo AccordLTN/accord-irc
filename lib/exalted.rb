@@ -46,7 +46,6 @@ class Exalted
 		# Send response
 		m.reply response
 	end
-  end
 
   def success_count (roll_array, ten_bool, sidereal=10)
 

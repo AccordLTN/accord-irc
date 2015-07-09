@@ -1,8 +1,3 @@
-# Returns array of dice rolls
-def roller(die, rep=1)
-	return rep.times.map{1 + rand(die)}
-end
-
 # Returns true if illegal character found.
 def check_character(arguement)
   arguement.each_char do |s|
@@ -49,6 +44,11 @@ def repeat_handler(string)
   return [repeats, rest_of_string]
 end 
 
+# Returns array of dice rolls
+def roller(die, rep=1)
+  return rep.times.map{1 + rand(die)}
+end
+
 def sanitize_input(input)
   # Are there any arguements?
   if input.length < 2
@@ -72,7 +72,6 @@ def sanitize_input(input)
     end
   end
 
-
   # Are there illegal characters or syntax?
   if check_arguement(input[1])
     return "Illegal character(s) or syntax."
@@ -83,3 +82,26 @@ end
 
 # puts sanitize_input("!exa 10d6+10/5-4*2".split)
 # puts sanitize_input("!exa 2#10d6+10/5-4*2".split)
+
+
+
+# searches array for 'dice' operator, d, then pops out the two adjacent numbers,
+# sends them to roller and replaces d with the sum of the roller result
+# needs to send the dice array somewhere too...
+def roll_handler (math_array, cosmetic_array)
+  # Test globalness
+  cosmetic_array += "meowkins"
+end
+
+@math_array = ["10", "d", "6", "+", "10", "/", "5", "-", "4", "*", "2"]
+@cosmetic_array = ["10", "d", "6", "+", "10", "/", "5", "-", "4", "*", "2"]
+puts math_array
+roll_handler(@math_array,@cosmetic_array)
+puts math_array
+puts cosmetic_array
+
+# searches array for */ operator, then +- operator, pops out adjacent numbers,
+# then performs the respective math before replacing the operator with the new number
+def math_handler(math_array)
+
+end
