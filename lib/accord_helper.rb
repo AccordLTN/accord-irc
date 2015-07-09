@@ -107,31 +107,40 @@ end
 # sends them to roller and replaces d with the sum of the roller result
 # needs to send the dice array somewhere too...
 def roll_handler (math_array, cosmetic_array)
-  # Get the position of the first d operator
-  dice_pos = math_array.index("d")
+  
+  while math_array.include?("d")
+    # Get the position of the first d operator
+    dice_pos = math_array.index("d")
 
-  # Fetch the number after it and delete it from the array
-  dice_faces = math_array.delete_at(dice_pos+1).to_i
-  cosmetic_array.delete_at(dice_pos+1)
+    # Fetch the number after it and delete it from the array
+    dice_faces = math_array.delete_at(dice_pos+1).to_i
+    cosmetic_array.delete_at(dice_pos+1)
 
-  # Fetch the number before it and delete it from the array
-  # This changes dice_pos, so change dice pos too
-  dice_repeat = math_array.delete_at(dice_pos-1).to_i
-  cosmetic_array.delete_at(dice_pos-1)
-  dice_pos -= 1
+    # Fetch the number before it and delete it from the array
+    # This changes dice_pos, so change dice pos too
+    dice_repeat = math_array.delete_at(dice_pos-1).to_i
+    c_dice_repeat = cosmetic_array.delete_at(dice_pos-1)
+    dice_pos -= 1
 
-  # Roll the dice, receiving an array of dice values in return
-  dice_output = roller(dice_faces, dice_repeat)
+    # Roll the dice, receiving an array of dice values in return
+    dice_output = roller(dice_faces, dice_repeat)
 
-  # Now add up the dice values
-  dice_sum = 0
-  dice_output.each{|x| dice_sum += x}
+    # Now add up the dice values
+    dice_sum = 0
+    dice_output.each{|x| dice_sum += x}
 
-  # Replace the d operator with the dice sum in the math array
-  math_array[dice_pos] = dice_sum.to_s
+    # Replace the d operator with the dice sum in the math array
+    math_array[dice_pos] = dice_sum.to_s
 
-  # Replace the d operator with the dice output in the cosmetic array
-  cosmetic_array[dice_pos] = "[" + dice_output.join("+") + ", " + dice_sum.to_s + "]"
+    # Replace the d operator with the dice output in the cosmetic array
+    # If the previous array entry was a dice array, handle it!
+    # I don't care how dumb it is, just do it.
+    if c_dice_repeat =~ /\)$/
+      cosmetic_array[dice_pos] = c_dice_repeat + "d" + dice_faces.to_s + "[" + dice_output.join("+") + "](" + dice_sum.to_s + ")"
+    else
+      cosmetic_array[dice_pos] = dice_repeat.to_s + "d" + dice_faces.to_s + "[" + dice_output.join("+") + "](" + dice_sum.to_s + ")"
+    end
+  end
 
   return [math_array, cosmetic_array]
 end

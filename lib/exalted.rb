@@ -27,16 +27,17 @@ class Exalted
     math_array = parse_arguement(input[1])
     cosmetic_array = math_array.deep_dup
 
-    # 
-    rolls_handled = roll_handler(math_array, cosmetic_array)
-    math_array = rolls_handled[0]
-    cosmetic_array = rolls_handled[1]
-
+    # Handle dice rolls if d operators exist
+    if math_array.include?("d")
+      rolls_handled = roll_handler(math_array, cosmetic_array)
+      math_array = rolls_handled[0]
+      cosmetic_array = rolls_handled[1]
+    end
 
     # Debugging
-    m.reply rolls_handled.to_s
-    m.reply response + cosmetic_array.join('') + " " + repetition.to_s
-    m.reply response + math_array.join('') + " " + repetition.to_s
+    # m.reply rolls_handled.to_s
+    m.reply response + cosmetic_array.join('')
+    m.reply response + math_array.join('')
 
 
 
