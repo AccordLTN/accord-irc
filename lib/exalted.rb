@@ -95,7 +95,7 @@ class Exalted
     roll_array = roller(10, math_array[0].to_i)
 
     # Totalling successes
-    successes = success_count(roll_array, double_tens, auto_success, target_number)
+    successes = success_count(roll_array, double_tens, auto_success, target_number, double_custom)
 
     # Add total rolls to response
     response += "(" + math_array[0].to_s + ") "
