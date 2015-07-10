@@ -13,9 +13,11 @@ def execute (input)
   response = "Lauras: "
   repetition = 1
 
+  # run allllll the error checks
   sanitation = sanitize_input(input)
   if sanitation != false
     return response + sanitation
+    #return 0 # needed once placed in the non-prototype
   end
 
  	double_tens = true

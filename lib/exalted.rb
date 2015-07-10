@@ -20,14 +20,14 @@ class Exalted
     # Input sanitation and error checking
     sanitation = sanitize_input(input)
     if sanitation[0] != false
-      m.reply response + sanitation[0]
+      m.reply response + sanitation
       return 1
     end
     input[1] = sanitation[1]
     repetition = sanitation[2]
 	
 		# Parsing
-    math_array = parse_arguement(input[1])
+    math_array = parse_argument(input[1])
     cosmetic_array = math_array.deep_dup
 
     # Handle dice rolls if d operators exist
@@ -54,7 +54,7 @@ class Exalted
       if input[2] =~ /^\d*$/
         double_custom = input[2].to_i
       else
-        m.reply response +"Improper use of !exd, pelase provide a target number as the second arguement."
+        m.reply response +"Improper use of !exd, pelase provide a target number as the second argument."
         return 1
       end
     end
@@ -64,14 +64,14 @@ class Exalted
       if input[3] =~ /^\d*$/
         target_number = input[3].to_i
       else
-        m.reply response + "Improper use of !exds, please provide a double number as the second arguement and a target number as the third arguement."
+        m.reply response + "Improper use of !exds, please provide a double number as the second argument and a target number as the third argument."
         return 1
       end
     elsif input[0] =~ /s/
       if input[2] =~ /^\d*$/
         target_number = input[2].to_i
       else
-        m.reply response + "Improper use of !exs, please provide a target number as the second arguement."
+        m.reply response + "Improper use of !exs, please provide a target number as the second argument."
         return 1
       end
     end
@@ -120,13 +120,13 @@ class Exalted
 
     # Add successes to response
     if successes > 0
-      response += "  Successes: " + successes.to_s
+      response += "    Successes: " + successes.to_s
     else
       response += "  Botch."
     end
 
     # Add unordered array to response
-    response += "           " + roll_array.to_s
+    response += "        " + roll_array.to_s
 
     # Send that response!
     m.reply response

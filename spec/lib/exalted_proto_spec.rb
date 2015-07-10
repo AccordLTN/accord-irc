@@ -3,7 +3,7 @@ require "exalted_proto"
 describe "Parses message and handles rolls" do
 	describe "execute" do
 		it "should detect lack of input" do
-			expect(execute("!ex")).to eq("Lauras: An arguement is required.")
+			expect(execute("!ex")).to eq("Lauras: An argument is required.")
 		end
 
 		it "should detect lack of number in input" do

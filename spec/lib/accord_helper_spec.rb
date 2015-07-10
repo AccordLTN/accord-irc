@@ -27,14 +27,14 @@ require "accord_helper"
 #   end
 # end
 
-# describe "check_arguement" do
+# describe "check_argument" do
 #   it "should return false if given proper input" do
-#     expect(check_arguement("10d6+10/5-4*2")).to eq(false)
+#     expect(check_argument("10d6+10/5-4*2")).to eq(false)
 #   end
 
 #   it "should return true if the first character isn't a number" do
-#     expect(check_arguement("a10d6+10")).to eq(true)
-#     expect(check_arguement("+6+10")).to eq(true)
+#     expect(check_argument("a10d6+10")).to eq(true)
+#     expect(check_argument("+6+10")).to eq(true)
 #   end
 # end
 
@@ -44,8 +44,8 @@ require "accord_helper"
 #     expect(sanitize_input("!ex 2#10d6+10/5-4*2".split)).to eq(false)
 #   end
 
-#   it "should complain if no arguements are given" do
-#     expect(sanitize_input("!ex".split)).to eq("An arguement is required.")
+#   it "should complain if no arguments are given" do
+#     expect(sanitize_input("!ex".split)).to eq("An argument is required.")
 #   end
 
 #   it "should find bad repeat usage" do
@@ -61,5 +61,7 @@ require "accord_helper"
 
 
 describe "roll_handler" do
-  
+  it "should do stuff" do
+    expect(roll_handler(["10", "d", "6", "+", "10", "/", "5", "-", "4", "*", "2"],["10", "d", "6", "+", "10", "/", "5", "-", "4", "*", "2"])).to 
+  end
 end

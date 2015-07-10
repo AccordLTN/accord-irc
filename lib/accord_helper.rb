@@ -13,8 +13,8 @@ end
 
 
 # Returns true if illegal character found.
-def check_character(arguement)
-  arguement.each_char do |s|
+def check_character(argument)
+  argument.each_char do |s|
     if !(s =~ /[d\d\+-\/*]/)
       return true;
     end
@@ -23,15 +23,15 @@ def check_character(arguement)
 end
 
 # Returns true if illegal syntax found.
-def check_arguement(arguement)
+def check_argument(argument)
   # First character must be a number.
-  if arguement[0] =~ /\D/
+  if argument[0] =~ /\D/
     return true;
   # Two operators in a row is detected.
-  elsif arguement =~ /[d+\-*\/][d+\-*\/]/
+  elsif argument =~ /[d+\-*\/][d+\-*\/]/
     return true;
   # Illegal characters
-  elsif check_character(arguement)
+  elsif check_character(argument)
     return true;
   else
     return false;
@@ -39,7 +39,7 @@ def check_arguement(arguement)
 end
 
 # Break a string like "10d6+10/5-4*2" into ["10", "d", "6" ...] etc
-def parse_arguement (input_string)
+def parse_argument (input_string)
   return input_string.split(/([d+\-*\/])/)
 end
 
@@ -65,37 +65,37 @@ end
 
 def sanitize_input(input)
   repetition = 1
-  arguement_string = input[1]
+  argument_string = input[1]
 
-  # Are there any arguements?
+  # Are there any arguments?
   if input.length < 2
-    return "An arguement is required."
+    return "An argument is required."
   end
 
   # Let's handle repeats first and get their operator out of the way
   # If it has a repeat operator
   # We need to access a global variable here... orz
-  if arguement_string =~ /\#/
+  if argument_string =~ /\#/
     # That operator must be the first operator, else error.
-    if arguement_string =~ /^\d*\#/
-      temp_array = repeat_handler(arguement_string)
+    if argument_string =~ /^\d*\#/
+      temp_array = repeat_handler(argument_string)
       if temp_array[1] =~ /\#/
         return "Two repeat operators? Get out."
       end
       # puts temp_array[0]
       repetition = temp_array[0].to_i
-      arguement_string = temp_array[1]
+      argument_string = temp_array[1]
     else
       return "Improper repeat operator usage."
     end
   end
 
   # Are there illegal characters or syntax?
-  if check_arguement(arguement_string)
+  if check_argument(argument_string)
     return "Illegal character(s) or syntax."
   end
 
-  return [false, arguement_string, repetition]
+  return [false, argument_string, repetition]
 end
 
 # puts sanitize_input("!exa 10d6+10/5-4*2".split)
@@ -137,9 +137,9 @@ def roll_handler (math_array, cosmetic_array)
     # If the previous array entry was a dice array, handle it!
     # I don't care how dumb it is, just do it.
     if c_dice_repeat =~ /\)$/
-      cosmetic_array[dice_pos] = c_dice_repeat + "d" + dice_faces.to_s + "[" + dice_output.join("+") + "](" + dice_sum.to_s + ")"
+      cosmetic_array[dice_pos] = c_dice_repeat + "d" + dice_faces.to_s + "[" + dice_output.join(",") + "](" + dice_sum.to_s + ")"
     else
-      cosmetic_array[dice_pos] = dice_repeat.to_s + "d" + dice_faces.to_s + "[" + dice_output.join("+") + "](" + dice_sum.to_s + ")"
+      cosmetic_array[dice_pos] = dice_repeat.to_s + "d" + dice_faces.to_s + "[" + dice_output.join(",") + "](" + dice_sum.to_s + ")"
     end
   end
 
@@ -193,7 +193,7 @@ def math_handler(math_array)
   #   end
   # end
 
-  
+
 # While the math array has * operators, solve them left to right.
   while math_array.include?("*")
     # Get the index of the first * operator
