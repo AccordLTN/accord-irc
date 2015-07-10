@@ -83,12 +83,12 @@ class Exalted
       auto_success = input[3].to_i
     elsif input[4] =~ /^\+\d*$/
       auto_success = input[4].to_i
-    elsif input[2] =~ /^-\d*$/
-      auto_success = -(input[2].to_i)
-    elsif input[3] =~ /^-\d*$/
-      auto_success = -(input[3].to_i)
-    elsif input[4] =~ /^-\d*$/
-      auto_success = -(input[4].to_i)
+    elsif input[2] =~ /^\-\d*$/
+      auto_success = input[2].to_i
+    elsif input[3] =~ /^\-\d*$/
+      auto_success = input[3].to_i
+    elsif input[4] =~ /^\-\d*$/
+      auto_success = input[4].to_i
     end
 
     # Performing Exalted rolls
@@ -101,19 +101,17 @@ class Exalted
     response += "(" + math_array[0].to_s + ") "
 
     # Add M mode
-    if !double_tens
-      response += "(M) "
-    end
+    response += "(M) " if !double_tens
 
     # Add D mode
-    if double_custom != false
-      response += "(D" + double_custom.to_s + ") "
-    end
+    response += "(D" + double_custom.to_s + ") " if double_custom != false
 
     # Add S mode
-    if target_number != 7
-      response += "(S" + target_number.to_s + ") "
-    end
+    response += "(S" + target_number.to_s + ") " if target_number != 7
+
+    # Add autosux
+    response += "(A+" + auto_success.to_s + ") " if auto_success > 0
+    response += "(A" + auto_success.to_s + ") " if auto_success < 0
 
     # Add ordered array to response
     response += roll_array.sort.reverse.join(', ')
