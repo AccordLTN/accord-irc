@@ -48,66 +48,19 @@ class Exalted
       @math_array = math_handler(@math_array)
     end
 
-    ###### Command Handling
-    # !exm disables @double_tens
-    if @input[0] =~ /m/
-      @double_tens = false
+    # Handle extra commands  
+    # This is being done a bit late, perhaps move it earlier by separating it from @response.
+    temp = modes_handler()
+    if temp == 1
+      m.reply @response
+      return 1
     end
-
-    # !exd adds another number that grants double successes
-    if @input[0] =~ /d/
-      if @input[2] =~ /^\d*$/
-        @double_custom = @input[2].to_i
-      else
-        m.reply @response +"Improper use of !exd, please provide a target number as the second argument."
-        return 1
-      end
-    end
-
-    # !exs supplies a new target number, should be in @input[2] or @input[3] if !exd is enabled
-    if @input[0] =~ /s/ && @double_custom != false
-      if @input[3] =~ /^\d*$/
-        @target_number = @input[3].to_i
-      else
-        m.reply @response + "Improper use of !exds, please provide a double number as the second argument and a target number as the third argument."
-        return 1
-      end
-    elsif @input[0] =~ /s/
-      if @input[2] =~ /^\d*$/
-        @target_number = @input[2].to_i
-      else
-        m.reply @response + "Improper use of !exs, please provide a target number as the second argument."
-        return 1
-      end
-    end
-
-    # Were there any auto-successes/penalties?
-    @input.each do |x|
-      @auto_success += x.to_i if x =~ /^[\+\-]\d*$/
-    end
-    ######
 
     # Performing Exalted rolls
     roll_array = roller(10, @math_array[0].to_i)
 
     # Totalling successes
     successes = success_count(roll_array)
-
-    # Add total rolls to @response
-    @response += "(" + @math_array[0].to_s + ") "
-
-    # Add M mode
-    @response += "(M) " if !@double_tens
-
-    # Add D mode
-    @response += "(D" + @double_custom.to_s + ") " if @double_custom != false
-
-    # Add S mode
-    @response += "(S" + @target_number.to_s + ") " if @target_number != 7
-
-    # Add autosux
-    @response += "(A+" + @auto_success.to_s + ") " if @auto_success > 0
-    @response += "(A" + @auto_success.to_s + ") " if @auto_success < 0
 
     # Add ordered array to @response
     @response += roll_array.sort.reverse.join(', ')
@@ -126,19 +79,57 @@ class Exalted
     m.reply @response
 	end
 
-  # def modes_handler
-  
-  # end
+  def modes_handler
+    # !exm disables @double_tens
+    if @input[0] =~ /m/
+      @double_tens = false
+    end
 
-  def response_formatting
+    # !exd adds another number that grants double successes
+    if @input[0] =~ /d/
+      if @input[2] =~ /^\d*$/
+        @double_custom = @input[2].to_i
+      else
+        @response += "Improper use of !exd, please provide a target number as the second argument."
+        return 1
+      end
+    end
 
+    # !exs supplies a new target number, should be in @input[2] or @input[3] if !exd is enabled
+    if @input[0] =~ /s/ && @double_custom != false
+      if @input[3] =~ /^\d*$/
+        @target_number = @input[3].to_i
+      else
+        @response += "Improper use of !exds, please provide a double number as the second argument and a target number as the third argument."
+        return 1
+      end
+    elsif @input[0] =~ /s/
+      if @input[2] =~ /^\d*$/
+        @target_number = @input[2].to_i
+      else
+        @response += "Improper use of !exs, please provide a target number as the second argument."
+        return 1
+      end
+    end
+
+    # Were there any auto-successes/penalties?
+    @input.each do |x|
+      @auto_success += x.to_i if x =~ /^[\+\-]\d*$/
+    end
+
+    # Assignments and syntax checking done, time to add to response.
+    # Add total rolls to @response
+    @response += "(" + @math_array[0].to_s + ") "
+    @response += "(M) " if !@double_tens
+    @response += "(D" + @double_custom.to_s + ") " if @double_custom != false
+    @response += "(S" + @target_number.to_s + ") " if @target_number != 7
+    @response += "(A+" + @auto_success.to_s + ") " if @auto_success > 0
+    @response += "(A" + @auto_success.to_s + ") " if @auto_success < 0
   end
 
   def success_count (roll_array)
     successes = @auto_success
-    if @double_custom == false
-      @double_custom = 10
-    end
+    @double_custom = 10 if @double_custom == false
 
     roll_array.each do |x|
       if x.to_i >= @double_custom && @double_tens
@@ -149,7 +140,7 @@ class Exalted
     end
     return successes
   end
-
 end
 
 # !exam 14+5-2 +2 Someday this will work
+# Haha, much more than this works now xD
