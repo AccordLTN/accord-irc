@@ -106,7 +106,7 @@ end
 # searches array for 'dice' operator, d, then pops out the two adjacent numbers,
 # sends them to roller and replaces d with the sum of the roller result
 # needs to send the dice array somewhere too...
-def roll_handler (math_array, cosmetic_array)
+def roll_handler (math_array, cosmetic_array, cosmetic_d=false)
   
   while math_array.include?("d")
     # Get the position of the first d operator
@@ -142,12 +142,13 @@ def roll_handler (math_array, cosmetic_array)
     if c_dice_repeat =~ /\)$/
       cosmetic_array[dice_pos] += c_dice_repeat.to_s
     # Else, put in the repeats of this roll.
+    elsif cosmetic_d
     else
       cosmetic_array[dice_pos] += dice_repeat.to_s
     end
 
     # Show operator and dice sides
-    cosmetic_array[dice_pos] += "d" + dice_faces.to_s
+    cosmetic_array[dice_pos] += "d" + dice_faces.to_s unless cosmetic_d
 
     # If there's more than one roll, show the array of rolls
     if dice_repeat > 1 || c_dice_repeat =~ /\)$/
