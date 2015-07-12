@@ -4,6 +4,18 @@ class Dicer
 
   def initializest
     @repetition = 1
+    @rolltoggle = false
+  end
+
+  match /toggleroll/, method: :toggle_roll
+  def toggle_roll(m)
+    if @rolltoggle
+      @rolltoggle = false
+      m.reply "#{m.user.nick}: Single-line mode activated."
+    else
+      @rolltoggle = true
+      m.reply "#{m.user.nick}: Multi-line mode activated."
+    end
   end
 
   match /roll/, method: :execute
