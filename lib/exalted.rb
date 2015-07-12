@@ -2,11 +2,11 @@ class Exalted
   include Cinch::Plugin
   require "./lib/accord_helper.rb"
   #require "accord_helper" # doesn't work?
-  #attr_accessor :math_array, :cosmetic_array, :@repetition
+  #attr_accessor :@math_array, :@cosmetic_array, :@repetition
 
   def initializest
-    @input = m.message.split
-    @response = "#{m.user.nick}: "
+    @input = []
+    @response = ""
     @math_array = []
     @cosmetic_array = []
     @repetition = 1
@@ -18,118 +18,117 @@ class Exalted
 
   match /ex/, method: :execute
   def execute(m)
-  	input = m.message.split
-    response = "#{m.user.nick}: "
-    math_array = []
-    cosmetic_array = []
-    @repetition = 1
-    @double_tens = true
-    @auto_success = 0
-    @target_number = 7
-    @double_custom = false
+    # Reset all values
+    initializest()
+    @input = m.message.split
+    @response = "#{m.user.nick}: "
 
-    # Input sanitation and error checking
-    sanitation = sanitize_input(input)
+    # @input sanitation and error checking
+    sanitation = sanitize_input(@input)
     if sanitation[0] != false
-      m.reply response + sanitation
+      m.reply @response + sanitation
       return 1
     end
-    input[1] = sanitation[1]
+    @input[1] = sanitation[1]
     @repetition = sanitation[2]
 	
 		# Parsing
-    math_array = parse_argument(input[1])
-    cosmetic_array = math_array.deep_dup
+    @math_array = parse_argument(@input[1])
+    @cosmetic_array = @math_array.deep_dup
 
     # Handle dice rolls if d operators exist
-    if math_array.include?("d")
-      rolls_handled = roll_handler(math_array, cosmetic_array)
-      math_array = rolls_handled[0]
-      cosmetic_array = rolls_handled[1]
+    if @math_array.include?("d")
+      rolls_handled = roll_handler(@math_array, @cosmetic_array)
+      @math_array = rolls_handled[0]
+      @cosmetic_array = rolls_handled[1]
     end
 
     # Handle math if */+- operators exist
-    if math_array.include?("*") || math_array.include?("/") || math_array.include?("+") || math_array.include?("-")
-      math_array = math_handler(math_array)
+    if @math_array.include?("*") || @math_array.include?("/") || @math_array.include?("+") || @math_array.include?("-")
+      @math_array = math_handler(@math_array)
     end
 
-    # Finally time for exalted specific things
-
+    ###### Command Handling
     # !exm disables @double_tens
-    if input[0] =~ /m/
+    if @input[0] =~ /m/
       @double_tens = false
     end
 
     # !exd adds another number that grants double successes
-    if input[0] =~ /d/
-      if input[2] =~ /^\d*$/
-        @double_custom = input[2].to_i
+    if @input[0] =~ /d/
+      if @input[2] =~ /^\d*$/
+        @double_custom = @input[2].to_i
       else
-        m.reply response +"Improper use of !exd, pelase provide a target number as the second argument."
+        m.reply @response +"Improper use of !exd, please provide a target number as the second argument."
         return 1
       end
     end
 
-    # !exs supplies a new target number, should be in input[2] or input[3] if !exd is enabled
-    if input[0] =~ /s/ && @double_custom != false
-      if input[3] =~ /^\d*$/
-        @target_number = input[3].to_i
+    # !exs supplies a new target number, should be in @input[2] or @input[3] if !exd is enabled
+    if @input[0] =~ /s/ && @double_custom != false
+      if @input[3] =~ /^\d*$/
+        @target_number = @input[3].to_i
       else
-        m.reply response + "Improper use of !exds, please provide a double number as the second argument and a target number as the third argument."
+        m.reply @response + "Improper use of !exds, please provide a double number as the second argument and a target number as the third argument."
         return 1
       end
-    elsif input[0] =~ /s/
-      if input[2] =~ /^\d*$/
-        @target_number = input[2].to_i
+    elsif @input[0] =~ /s/
+      if @input[2] =~ /^\d*$/
+        @target_number = @input[2].to_i
       else
-        m.reply response + "Improper use of !exs, please provide a target number as the second argument."
+        m.reply @response + "Improper use of !exs, please provide a target number as the second argument."
         return 1
       end
     end
 
     # Were there any auto-successes/penalties?
-    input.each do |x|
+    @input.each do |x|
       @auto_success += x.to_i if x =~ /^[\+\-]\d*$/
     end
+    ######
 
     # Performing Exalted rolls
-    roll_array = roller(10, math_array[0].to_i)
+    roll_array = roller(10, @math_array[0].to_i)
 
     # Totalling successes
     successes = success_count(roll_array)
 
-    # Add total rolls to response
-    response += "(" + math_array[0].to_s + ") "
+    # Add total rolls to @response
+    @response += "(" + @math_array[0].to_s + ") "
 
     # Add M mode
-    response += "(M) " if !@double_tens
+    @response += "(M) " if !@double_tens
 
     # Add D mode
-    response += "(D" + @double_custom.to_s + ") " if @double_custom != false
+    @response += "(D" + @double_custom.to_s + ") " if @double_custom != false
 
     # Add S mode
-    response += "(S" + @target_number.to_s + ") " if @target_number != 7
+    @response += "(S" + @target_number.to_s + ") " if @target_number != 7
 
     # Add autosux
-    response += "(A+" + @auto_success.to_s + ") " if @auto_success > 0
-    response += "(A" + @auto_success.to_s + ") " if @auto_success < 0
+    @response += "(A+" + @auto_success.to_s + ") " if @auto_success > 0
+    @response += "(A" + @auto_success.to_s + ") " if @auto_success < 0
 
-    # Add ordered array to response
-    response += roll_array.sort.reverse.join(', ')
+    # Add ordered array to @response
+    @response += roll_array.sort.reverse.join(', ')
 
-    # Add successes to response
+    # Add successes to @response
     if successes > 0
-      response += "    Successes: " + successes.to_s
+      @response += "    Successes: " + successes.to_s
     else
-      response += "  Botch."
+      @response += "  Botch."
     end
 
-    # Add unordered array to response
-    response += "        " + roll_array.to_s
+    # Add unordered array to @response
+    @response += "        " + roll_array.to_s
 
-    # Send that response!
-    m.reply response
+    # Send that @response!
+    m.reply @response
 	end
+
+  # def modes_handler
+  
+  # end
 
   def response_formatting
 
