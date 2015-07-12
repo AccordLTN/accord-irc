@@ -1,4 +1,6 @@
 # deep_dup implementation for Array and Object
+# deep_dup creates a copy of an array rather than merely passing a pointer 
+# to its memory address.
 class Array
   def deep_dup
     map {|x| x.deep_dup}
@@ -22,7 +24,7 @@ def check_character(argument)
   return false;
 end
 
-# Returns true if illegal syntax found.
+# Returns true if illegal syntax or character found.
 def check_argument(argument)
   # First character must be a number.
   if argument[0] =~ /\D/
@@ -74,7 +76,6 @@ def sanitize_input(input)
 
   # Let's handle repeats first and get their operator out of the way
   # If it has a repeat operator
-  # We need to access a global variable here... orz
   if argument_string =~ /\#/
     # That operator must be the first operator, else error.
     if argument_string =~ /^\d*\#/
@@ -82,7 +83,6 @@ def sanitize_input(input)
       if temp_array[1] =~ /\#/
         return "Two repeat operators? Get out."
       end
-      # puts temp_array[0]
       repetition = temp_array[0].to_i
       argument_string = temp_array[1]
     else
@@ -136,11 +136,26 @@ def roll_handler (math_array, cosmetic_array)
     # Replace the d operator with the dice output in the cosmetic array
     # If the previous array entry was a dice array, handle it!
     # I don't care how dumb it is, just do it.
+    cosmetic_array[dice_pos] = ''
+
+    # If the previous array entry was a dice array, handle it.
     if c_dice_repeat =~ /\)$/
-      cosmetic_array[dice_pos] = c_dice_repeat + "d" + dice_faces.to_s + "[" + dice_output.join(",") + "](" + dice_sum.to_s + ")"
+      cosmetic_array[dice_pos] += c_dice_repeat.to_s
+    # Else, put in the repeats of this roll.
     else
-      cosmetic_array[dice_pos] = dice_repeat.to_s + "d" + dice_faces.to_s + "[" + dice_output.join(",") + "](" + dice_sum.to_s + ")"
+      cosmetic_array[dice_pos] += dice_repeat.to_s
     end
+
+    # Show operator and dice sides
+    cosmetic_array[dice_pos] += "d" + dice_faces.to_s
+
+    # If there's more than one roll, show the array of rolls
+    if dice_repeat > 1 || c_dice_repeat =~ /\)$/
+      cosmetic_array[dice_pos] += "[" + dice_output.join(",") + "]"
+    end
+
+    # Place the result
+    cosmetic_array[dice_pos] += "(" + dice_sum.to_s + ")"
   end
 
   return [math_array, cosmetic_array]
@@ -156,44 +171,6 @@ end
 # Searches array for */ operator, then +- operator, pops out adjacent numbers,
 # then performs the respective math before replacing the operator with the new number
 def math_handler(math_array)
-  # While the math array has * or / operators, solve them left to right.
-  
-  # while math_array.include?("*") || math_array.include?("/")
-  #   # Get the index of the first * operator
-  #   mult_pos = math_array.index("*").to_i
-  #   div_pos = math_array.index("/").to_i
-
-  #   # So much repeated code, but I kept having strange problems
-  #   # without doing it this way.
-  #   # TODO: Find a way to not repeat so much code kthx.
-  #   if div_pos.nil?
-  #     mult_b = math_array.delete_at(mult_pos+1).to_i
-  #     mult_a = math_array.delete_at(mult_pos-1).to_i
-  #     mult_pos -= 1
-  #     # Replace the * operator with the new number
-  #     math_array[mult_pos] = (mult_a * mult_b).to_s
-  #   elsif mult_pos.nil?
-  #     div_b = math_array.delete_at(div_pos+1).to_i
-  #     div_a = math_array.delete_at(div_pos-1).to_i
-  #     div_pos -= 1
-  #     # Replace the / operator with the new number
-  #     math_array[math_array.index("/").to_i] = (div_a / div_b).to_s
-  #   elsif mult_pos < div_pos
-  #     mult_b = math_array.delete_at(mult_pos+1).to_i
-  #     mult_a = math_array.delete_at(mult_pos-1).to_i
-  #     mult_pos -= 1
-  #     # Replace the * operator with the new number
-  #     math_array[mult_pos] = (mult_a * mult_b).to_s
-  #   elsif div_pos < mult_pos
-  #     div_b = math_array.delete_at(div_pos+1).to_i
-  #     div_a = math_array.delete_at(div_pos-1).to_i
-  #     div_pos -= 1
-  #     # Replace the / operator with the new number
-  #     math_array[math_array.index("/").to_i] = (div_a / div_b).to_s
-  #   end
-  # end
-
-
 # While the math array has * operators, solve them left to right.
   while math_array.include?("*")
     # Get the index of the first * operator
@@ -276,10 +253,86 @@ end
 
 
 
+################## MATH HANDLER ATTEMPT #1 ##################
+# Mysteriously keeps repeating the / operator and destroys math_array
 
-# MathHandler stuffsssss
+#   # Searches array for */ operator, then +- operator, pops out adjacent numbers,
+# # then performs the respective math before replacing the operator with the new number
+# def math_handler(math_array)
+#   puts math_array.to_s
+#   # While the math array has */ operators, solve them left to right.
+#   while math_array.include?("*") || math_array.include?("/")
+#     # Get the index of the first * and first / operators
+#     mult_pos = math_array.index("*").to_i
+#     div_pos = math_array.index("/").to_i
 
-#######################
+#     # We don't want no stinkin nils messing this up!
+#     if mult_pos.nil?
+#       mult_pos = 9999
+#     elsif div_pos.nil?
+#       div_pos = 9999
+#     end
+
+#     if mult_pos < div_pos && mult_pos < 9998
+#       mult_b = math_array.delete_at(mult_pos+1).to_i
+#       mult_a = math_array.delete_at(mult_pos-1).to_i
+#       mult_pos -= 1
+
+#       puts mult_a.to_s + " * " + mult_b.to_s
+#       math_array[mult_pos] = (mult_a * mult_b).to_s
+#       puts math_array.to_s
+#     elsif div_pos < mult_pos && sub_pos < 9998
+#       div_b = math_array.delete_at(div_pos+1).to_i
+#       div_a = math_array.delete_at(div_pos-1).to_i
+#       div_pos -= 1
+
+#       puts div_a.to_s + " / " + div_b.to_s
+#       math_array[math_array.index("/").to_i] = (div_a / div_b).to_s
+#       puts math_array.to_s
+#     end
+#   end
+
+#   # While the math array has +- operators, solve them left to right.
+#   while math_array.include?("+") || math_array.include?("-")
+#     # Get the index of the first + and first - operators
+#     plus_pos = math_array.index("+")
+#     sub_pos = math_array.index("-")
+    
+#     # We don't want no stinkin nils messing this up!
+#     if plus_pos.nil?
+#       plus_pos = 9999
+#     elsif sub_pos.nil?
+#       sub_pos = 9999
+#     end
+
+#     if plus_pos < sub_pos  && plus_pos < 9998
+#       plus_b = math_array.delete_at(plus_pos+1).to_i
+#       plus_a = math_array.delete_at(plus_pos-1).to_i
+#       plus_pos -= 1
+      
+#       puts plus_a.to_s + " + " + plus_b.to_s
+#       math_array[plus_pos] = (plus_a + plus_b).to_s
+#       puts math_array.to_s
+#     elsif sub_pos < plus_pos && sub_pos < 9998
+#       sub_b = math_array.delete_at(sub_pos+1).to_i
+#       sub_a = math_array.delete_at(sub_pos-1).to_i
+#       sub_pos -= 1
+
+#       puts sub_a.to_s + " - " + sub_b.to_s
+#       math_array[sub_pos] = (sub_a - sub_b).to_s
+#       puts math_array.to_s
+#     end
+#   end
+
+#   return math_array
+# end
+
+
+
+################## MATH HANDLER ATTEMPT #2 ##################
+# I was dumb and somehow thought for a moment that the order of
+# +- execution wasn't important.
+
 # # While the math array has * operators, solve them left to right.
 #   while math_array.include?("*")
 #     # Get the index of the first * operator
@@ -325,3 +378,93 @@ end
   #   # Replace the - operator with the new number
   #   math_array[sub_pos] = (sub_a - sub_b).to_s
   # end
+
+
+
+
+
+################## MATH HANDLER ATTEMPT #3 ##################
+# Mysteriously keeps repeating the / operator and destroys math_array AGAIN!? why
+# Used a lot of repeated code in those if else sets when I was debugging, trying
+# to fix it...
+
+#   # Searches array for */ operator, then +- operator, pops out adjacent numbers,
+# # then performs the respective math before replacing the operator with the new number
+# def math_handler(math_array)
+#   # While the math array has * or / operators, solve them left to right.
+  
+  # while math_array.include?("*") || math_array.include?("/")
+  #   # Get the index of the first * operator
+  #   mult_pos = math_array.index("*").to_i
+  #   div_pos = math_array.index("/").to_i
+
+  #   # So much repeated code, but I kept having strange problems
+  #   # without doing it this way.
+  #   # TODO: Find a way to not repeat so much code kthx.
+  #   if div_pos.nil?
+  #     mult_b = math_array.delete_at(mult_pos+1).to_i
+  #     mult_a = math_array.delete_at(mult_pos-1).to_i
+  #     mult_pos -= 1
+  #     # Replace the * operator with the new number
+  #     math_array[mult_pos] = (mult_a * mult_b).to_s
+  #   elsif mult_pos.nil?
+  #     div_b = math_array.delete_at(div_pos+1).to_i
+  #     div_a = math_array.delete_at(div_pos-1).to_i
+  #     div_pos -= 1
+  #     # Replace the / operator with the new number
+  #     math_array[math_array.index("/").to_i] = (div_a / div_b).to_s
+  #   elsif mult_pos < div_pos
+  #      mult_b = math_array.delete_at(mult_pos+1).to_i
+  #      mult_a = math_array.delete_at(mult_pos-1).to_i
+  #      mult_pos -= 1
+  #      # Replace the * operator with the new number
+  #      math_array[mult_pos] = (mult_a * mult_b).to_s
+  #    elsif div_pos < mult_pos
+  #      div_b = math_array.delete_at(div_pos+1).to_i
+  #      div_a = math_array.delete_at(div_pos-1).to_i
+  #      div_pos -= 1
+  #      # Replace the / operator with the new number
+  #      math_array[math_array.index("/").to_i] = (div_a / div_b).to_s
+  #    end
+  #  end
+
+#   # While the math array has + or - operators, solve them left to right.
+#   while math_array.include?("+") || math_array.include?("-")
+#     # Get the index of the first + and - operators
+#     plus_pos = math_array.index("+")
+#     sub_pos = math_array.index("-")
+
+#     # So much repeated code, but I kept having strange problems
+#     # without doing it this way.
+#     # TODO: Find a way to not repeat so much code kthx.
+#     if sub_pos.nil?
+#       # Get the index of the first + operator
+#       plus_b = math_array.delete_at(plus_pos+1).to_i
+#       plus_a = math_array.delete_at(plus_pos-1).to_i
+#       plus_pos -= 1
+#       # Replace the + operator with the new number    
+#       math_array[plus_pos] = (plus_a + plus_b).to_s
+#     elsif plus_pos.nil?
+#       sub_b = math_array.delete_at(sub_pos+1).to_i
+#       sub_a = math_array.delete_at(sub_pos-1).to_i
+#       sub_pos -= 1
+#       # Replace the - operator with the new number
+#       math_array[sub_pos] = (sub_a - sub_b).to_s
+#     elsif plus_pos < sub_pos
+#       plus_b = math_array.delete_at(plus_pos+1).to_i
+#       plus_a = math_array.delete_at(plus_pos-1).to_i
+#       plus_pos -= 1
+#       # Replace the + operator with the new number    
+#       math_array[plus_pos] = (plus_a + plus_b).to_s
+#     elsif sub_pos < plus_pos
+#       sub_b = math_array.delete_at(sub_pos+1).to_i
+#       sub_a = math_array.delete_at(sub_pos-1).to_i
+#       sub_pos -= 1
+#       # Replace the - operator with the new number
+#       math_array[sub_pos] = (sub_a - sub_b).to_s
+#     end
+#   end
+
+#   # Should be just one number.
+#   return math_array
+# end
