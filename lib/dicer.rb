@@ -2,8 +2,11 @@ class Dicer
   include Cinch::Plugin
   require "./lib/accord_helper.rb"
 
-  match /roll\s/
+  # def initializest
+  #   @repetition = 1
+  # end
 
+  match /roll\s/, method: :execute
   def execute(m)
     input = m.message.split
     response = "#{m.user.nick}: "
@@ -31,6 +34,7 @@ class Dicer
     while repeats <= repetition do
       # Empty out the repeat_response from last repeat.
       repeat_response = ''
+      repeat_response += ',  ' if repeats > 1
 
       # Make our arrays, deep_dups so that future repeats don't have issues.
       math_array = parsed_array.deep_dup
@@ -54,7 +58,7 @@ class Dicer
       end
       
       # Slap on the cosmetic array and prettyness, then the math_array, which should be just one number
-      repeat_response += cosmetic_array.join('') + " ----> {" + math_array.join('') + "},   "
+      repeat_response += "" + cosmetic_array.join('') + "  {" + math_array.join('') + "}"
 
       # Send that response!
       complete_response += repeat_response
@@ -69,13 +73,7 @@ class Dicer
 
     # Result summary
     if repetition > 1
-      complete_result = ''
-      repeats = 1
-      result_array.each do |x|
-        complete_result += repeats.to_s + ": {" + x.to_s + "}, "
-        repeats += 1
-      end
-      m.reply response + complete_result
+      m.reply response + result_array.join(", ")
     end
   end
 end
