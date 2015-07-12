@@ -77,18 +77,8 @@ class Exalted
     end
 
     # Were there any auto-successes/penalties?
-    if input[2] =~ /^\+\d*$/
-      auto_success = input[2].to_i
-    elsif input[3] =~ /^\+\d*$/
-      auto_success = input[3].to_i
-    elsif input[4] =~ /^\+\d*$/
-      auto_success = input[4].to_i
-    elsif input[2] =~ /^\-\d*$/
-      auto_success = input[2].to_i
-    elsif input[3] =~ /^\-\d*$/
-      auto_success = input[3].to_i
-    elsif input[4] =~ /^\-\d*$/
-      auto_success = input[4].to_i
+    input.each do |x|
+      auto_success += x.to_i if x =~ /^[\+\-]\d*$/
     end
 
     # Performing Exalted rolls
