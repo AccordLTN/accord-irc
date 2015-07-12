@@ -2,20 +2,31 @@ class Exalted
   include Cinch::Plugin
   require "./lib/accord_helper.rb"
   #require "accord_helper" # doesn't work?
-  #attr_accessor :math_array, :cosmetic_array, :repetition
+  #attr_accessor :math_array, :cosmetic_array, :@repetition
 
-  match /ex/
+  def initializest
+    @input = m.message.split
+    @response = "#{m.user.nick}: "
+    @math_array = []
+    @cosmetic_array = []
+    @repetition = 1
+    @double_tens = true
+    @auto_success = 0
+    @target_number = 7
+    @double_custom = false
+  end
 
+  match /ex/, method: :execute
   def execute(m)
   	input = m.message.split
     response = "#{m.user.nick}: "
     math_array = []
     cosmetic_array = []
-    repetition = 1
-    double_tens = true
-    auto_success = 0
-    target_number = 7
-    double_custom = false
+    @repetition = 1
+    @double_tens = true
+    @auto_success = 0
+    @target_number = 7
+    @double_custom = false
 
     # Input sanitation and error checking
     sanitation = sanitize_input(input)
@@ -24,7 +35,7 @@ class Exalted
       return 1
     end
     input[1] = sanitation[1]
-    repetition = sanitation[2]
+    @repetition = sanitation[2]
 	
 		# Parsing
     math_array = parse_argument(input[1])
@@ -44,15 +55,15 @@ class Exalted
 
     # Finally time for exalted specific things
 
-    # !exm disables double_tens
+    # !exm disables @double_tens
     if input[0] =~ /m/
-      double_tens = false
+      @double_tens = false
     end
 
     # !exd adds another number that grants double successes
     if input[0] =~ /d/
       if input[2] =~ /^\d*$/
-        double_custom = input[2].to_i
+        @double_custom = input[2].to_i
       else
         m.reply response +"Improper use of !exd, pelase provide a target number as the second argument."
         return 1
@@ -60,16 +71,16 @@ class Exalted
     end
 
     # !exs supplies a new target number, should be in input[2] or input[3] if !exd is enabled
-    if input[0] =~ /s/ && double_custom != false
+    if input[0] =~ /s/ && @double_custom != false
       if input[3] =~ /^\d*$/
-        target_number = input[3].to_i
+        @target_number = input[3].to_i
       else
         m.reply response + "Improper use of !exds, please provide a double number as the second argument and a target number as the third argument."
         return 1
       end
     elsif input[0] =~ /s/
       if input[2] =~ /^\d*$/
-        target_number = input[2].to_i
+        @target_number = input[2].to_i
       else
         m.reply response + "Improper use of !exs, please provide a target number as the second argument."
         return 1
@@ -78,30 +89,30 @@ class Exalted
 
     # Were there any auto-successes/penalties?
     input.each do |x|
-      auto_success += x.to_i if x =~ /^[\+\-]\d*$/
+      @auto_success += x.to_i if x =~ /^[\+\-]\d*$/
     end
 
     # Performing Exalted rolls
     roll_array = roller(10, math_array[0].to_i)
 
     # Totalling successes
-    successes = success_count(roll_array, double_tens, auto_success, target_number, double_custom)
+    successes = success_count(roll_array)
 
     # Add total rolls to response
     response += "(" + math_array[0].to_s + ") "
 
     # Add M mode
-    response += "(M) " if !double_tens
+    response += "(M) " if !@double_tens
 
     # Add D mode
-    response += "(D" + double_custom.to_s + ") " if double_custom != false
+    response += "(D" + @double_custom.to_s + ") " if @double_custom != false
 
     # Add S mode
-    response += "(S" + target_number.to_s + ") " if target_number != 7
+    response += "(S" + @target_number.to_s + ") " if @target_number != 7
 
     # Add autosux
-    response += "(A+" + auto_success.to_s + ") " if auto_success > 0
-    response += "(A" + auto_success.to_s + ") " if auto_success < 0
+    response += "(A+" + @auto_success.to_s + ") " if @auto_success > 0
+    response += "(A" + @auto_success.to_s + ") " if @auto_success < 0
 
     # Add ordered array to response
     response += roll_array.sort.reverse.join(', ')
@@ -120,16 +131,20 @@ class Exalted
     m.reply response
 	end
 
-  def success_count (roll_array, double_tens = true, auto_success = 0,target_number = 7, double_custom = 10)
-    successes = auto_success
-    if double_custom == false
-      double_custom = 10
+  def response_formatting
+
+  end
+
+  def success_count (roll_array)
+    successes = @auto_success
+    if @double_custom == false
+      @double_custom = 10
     end
 
     roll_array.each do |x|
-      if x.to_i >= double_custom && double_tens
+      if x.to_i >= @double_custom && @double_tens
         successes += 2
-      elsif x.to_i >= target_number
+      elsif x.to_i >= @target_number
         successes += 1
       end
     end

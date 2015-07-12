@@ -2,9 +2,9 @@ class Dicer
   include Cinch::Plugin
   require "./lib/accord_helper.rb"
 
-  # def initializest
-  #   @repetition = 1
-  # end
+  def initializest
+    @repetition = 1
+  end
 
   match /roll\s/, method: :execute
   def execute(m)
@@ -12,7 +12,7 @@ class Dicer
     response = "#{m.user.nick}: "
     math_array = []
     cosmetic_array = []
-    repetition = 1
+    @repetition = 1
     
     # Input sanitation and error checking
     sanitation = sanitize_input(input)
@@ -21,7 +21,7 @@ class Dicer
       return 1
     end
     input[1] = sanitation[1]
-    repetition = sanitation[2]
+    @repetition = sanitation[2]
   
     # Parsing
     parsed_array = parse_argument(input[1])
@@ -31,7 +31,7 @@ class Dicer
     result_array = []
 
     repeats = 1
-    while repeats <= repetition do
+    while repeats <= @repetition do
       # Empty out the repeat_response from last repeat.
       repeat_response = ''
       repeat_response += ',  ' if repeats > 1
@@ -53,7 +53,7 @@ class Dicer
       end
 
       # If there are repeats, label each roll with its number
-      if repetition > 1
+      if @repetition > 1
         repeat_response += repeats.to_s + ": "
       end
       
@@ -72,7 +72,7 @@ class Dicer
     m.reply response + complete_response
 
     # Result summary
-    if repetition > 1
+    if @repetition > 1
       m.reply response + result_array.join(", ")
     end
   end
