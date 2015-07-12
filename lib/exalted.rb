@@ -137,9 +137,7 @@ class Exalted
     end
 
     roll_array.each do |x|
-      if x.to_i == 10 && double_tens
-        successes += 2
-      elsif x.to_i == double_custom
+      if x.to_i >= double_custom && double_tens
         successes += 2
       elsif x.to_i >= target_number
         successes += 1
