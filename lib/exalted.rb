@@ -13,7 +13,7 @@ class Exalted
     @double_tens = true
     @auto_success = 0
     @target_number = 7
-    @double_custom = false
+    @double_custom = nil
   end
 
   match /ex/, method: :execute
@@ -81,9 +81,7 @@ class Exalted
 
   def modes_handler
     # !exm disables @double_tens
-    if @input[0] =~ /m/
-      @double_tens = false
-    end
+    @double_tens = false if @input[0] =~ /m/
 
     # !exd adds another number that grants double successes
     if @input[0] =~ /d/
@@ -96,7 +94,7 @@ class Exalted
     end
 
     # !exs supplies a new target number, should be in @input[2] or @input[3] if !exd is enabled
-    if @input[0] =~ /s/ && @double_custom != false
+    if @input[0] =~ /s/ && @double_custom != nil
       if @input[3] =~ /^\d*$/
         @target_number = @input[3].to_i
       else
@@ -112,16 +110,15 @@ class Exalted
       end
     end
 
-    # Were there any auto-successes/penalties?
+    # Were there any auto-successes/penalties? If so, sum them into @auto_success
     @input.each do |x|
       @auto_success += x.to_i if x =~ /^[\+\-]\d*$/
     end
 
     # Assignments and syntax checking done, time to add to response.
-    # Add total rolls to @response
     @response += "(" + @math_array[0].to_s + ") "
     @response += "(M) " if !@double_tens
-    @response += "(D" + @double_custom.to_s + ") " if @double_custom != false
+    @response += "(D" + @double_custom.to_s + ") " if @double_custom != nil
     @response += "(S" + @target_number.to_s + ") " if @target_number != 7
     @response += "(A+" + @auto_success.to_s + ") " if @auto_success > 0
     @response += "(A" + @auto_success.to_s + ") " if @auto_success < 0
@@ -129,7 +126,7 @@ class Exalted
 
   def success_count (roll_array)
     successes = @auto_success
-    @double_custom = 10 if @double_custom == false
+    @double_custom ||= 10
 
     roll_array.each do |x|
       if x.to_i >= @double_custom && @double_tens
