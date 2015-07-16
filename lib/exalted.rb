@@ -4,9 +4,9 @@ class Exalted
   #require "accord_helper" # doesn't work?
   #attr_accessor :@math_array, :@cosmetic_array, :@repetition
 
-  def initializest
-    @input = []
-    @response = ""
+  def initializest (input, response)
+    @input = input
+    @response = response
     @math_array = []
     @cosmetic_array = []
     @repetition = 1
@@ -19,9 +19,7 @@ class Exalted
   match /ex/, method: :execute
   def execute(m)
     # Reset all values
-    initializest()
-    @input = m.message.split
-    @response = "#{m.user.nick}: "
+    initializest(m.message.split, "#{m.user.nick}: ")
 
     # @input sanitation and error checking
     sanitation = sanitize_input(@input)
