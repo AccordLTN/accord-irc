@@ -3,6 +3,8 @@ class Exalted
   require "./lib/accord_helper.rb"
   #require "accord_helper" # doesn't work?
 
+  # initialize seems to be taken up by Cinch::Plugin or something?  idgi
+  # Resets all variables to their defaults
   def initializes (input, response)
     @input = input
     @response = response
@@ -65,8 +67,10 @@ class Exalted
     # Add successes to @response
     if successes > 0
       @response += "    Successes: " + successes.to_s
-    else
+    elsif successes == 0 && roll_array.include?(1)
       @response += "  Botch."
+    else
+      @response += "    Successes: 0"
     end
 
     # Add unordered array to @response
