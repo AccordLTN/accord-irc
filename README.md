@@ -5,3 +5,5 @@ Two notable plugins are in development for Accord:
 
 *Dicer, a more robust dice rolling plugin for d20-esque systems.
 *Exalted, a dice rolling system for Exalted, a tabletop game produced by White Wolf Publishing.
+*ISeen, a !seen command that remembers things!
+*Snark, tracks !botsmack and !botsnack karma as well as dice luck.

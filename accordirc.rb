@@ -11,7 +11,7 @@ identify = IdentifyInfo.new
 bot = Cinch::Bot.new do
   configure do |c|
     c.server = "irc.rizon.net"
-    c.channels = ["#fuuuuuuuuuuu","#WesternSun", "#WesternSunOOC","#CrackOfDawn","#CrackOfDawnOOC","TheLesserEvil","TheLesserEvilOOC"]
+    c.channels = ["#fuuuuuuuuuuu","#WesternSun", "#WesternSunOOC","#CrackOfDawn","#CrackOfDawnOOC","#TheLesserEvil","#TheLesserEvilOOC"]
     c.nicks = ["Accord", "Accords"]
     c.realname = "Accord"
     c.user = "Accord"
